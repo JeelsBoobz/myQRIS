@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0b0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title>Bayar via QRIS — JeelsBoobz</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg: #0b0b0f;
+            --card: #15151b;
+            --card2: #1c1c23;
+            --text: #ffffff;
+            --muted: #9999a5;
+            --border: rgba(255,255,255,.08);
+            --accent: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 50% 0%, #292934 0%, #111116 35%, #08080b 75%);
+            color: var(--text);
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 24px 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 430px;
+            animation: appear .5s ease;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #bdbdc7;
+            margin-bottom: 10px;
+        }
+
+        .brand-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 12px rgba(255,255,255,.8);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 27px;
+            font-weight: 750;
+            letter-spacing: -.6px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .card {
+            background: rgba(21,21,27,.92);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 22px;
+            box-shadow:
+                0 25px 70px rgba(0,0,0,.45),
+                inset 0 1px 0 rgba(255,255,255,.03);
+            backdrop-filter: blur(20px);
+        }
+
+        .merchant {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 4px 2px 20px;
+        }
+
+        .merchant-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffffff, #cfcfd5);
+            color: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            font-weight: 800;
+            box-shadow: 0 8px 25px rgba(0,0,0,.25);
+        }
+
+        .merchant-info {
+            flex: 1;
+        }
+
+        .merchant-name {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .merchant-location {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .verified {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 5px;
+            color: #bdbdc7;
+            font-size: 11px;
+        }
+
+        .qr-wrapper {
+            background: #fff;
+            border-radius: 22px;
+            padding: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow:
+                0 15px 40px rgba(0,0,0,.25);
+        }
+
+        #qrcode {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #qrcode img,
+        #qrcode canvas {
+            display: block;
+            width: min(100%, 310px) !important;
+            height: auto !important;
+            aspect-ratio: 1 / 1;
+        }
+
+        .scan-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: #a8a8b2;
+            font-size: 13px;
+            margin: 18px 0 20px;
+        }
+
+        .scan-icon {
+            width: 17px;
+            height: 17px;
+            border: 1.5px solid #aaa;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .scan-icon::after {
+            content: "";
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            top: 7px;
+            height: 1px;
+            background: #aaa;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0 0 18px;
+        }
+
+        .payment-info {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .payment-row + .payment-row {
+            margin-top: 10px;
+        }
+
+        .label {
+            color: #858591;
+            font-size: 12px;
+        }
+
+        .value {
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #d5d5db;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            border: 0;
+            min-height: 48px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition:
+                transform .15s ease,
+                opacity .15s ease,
+                background .15s ease;
+        }
+
+        button:active {
+            transform: scale(.97);
+        }
+
+        .download {
+            background: #fff;
+            color: #111;
+        }
+
+        .share {
+            background: #292930;
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+
+        button:hover {
+            opacity: .88;
+        }
+
+        .notice {
+            margin-top: 15px;
+            padding: 13px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.035);
+            border: 1px solid var(--border);
+            color: #858591;
+            font-size: 11px;
+            line-height: 1.55;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64646e;
+            font-size: 11px;
+            margin-top: 18px;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 25px;
+            transform: translate(-50%, 20px);
+            background: #fff;
+            color: #111;
+            padding: 11px 17px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: .25s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,.3);
+            z-index: 999;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        @media (max-width: 360px) {
+            .card {
+                padding: 16px;
+                border-radius: 23px;
+            }
+
+            .qr-wrapper {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="brand">
+            <span class="brand-dot"></span>
+            Pembayaran Digital
+        </div>
+
+        <h1>Bayar dengan QRIS</h1>
+
+        <p>Scan QR Code menggunakan aplikasi pembayaran Anda</p>
+    </div>
+
+    <div class="card">
+
+        <!--
+        <div class="merchant">
+            <div class="merchant-logo">
+                JB
+            </div>
+
+            <div class="merchant-info">
+                <div class="merchant-name">
+                    JeelsBoobz
+                </div>
+
+                <div class="merchant-location">
+                    Kab. Semarang
+                </div>
+
+                <div class="verified">
+                    ✓ QRIS Merchant
+                </div>
+            </div>
+        </div>
+        -->
+
+        <div class="qr-wrapper">
+            <div id="qrcode"></div>
+        </div>
+
+        <div class="scan-info">
+            <span class="scan-icon"></span>
+            Arahkan kamera ke QR Code untuk membayar
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="payment-info">
+
+            <div class="payment-row">
+                <span class="label">Merchant</span>
+                <span class="value">JeelsBoobz</span>
+            </div>
+
+            <div class="payment-row">
+                <span class="label">Lokasi</span>
+                <span class="value">Kab. Semarang</span>
+            </div>
+
+            <div class="payment-row">
+                <span class="label">Status</span>
+
+                <span class="value status">
+                    <span class="status-dot"></span>
+                    Siap menerima pembayaran
+                </span>
+            </div>
+
+        </div>
+
+        <div class="buttons">
+            <button class="download" onclick="downloadQR()">
+                ↓ &nbsp; Download QR
+            </button>
+
+            <button class="share" onclick="shareQR()">
+                ↗ &nbsp; Bagikan
+            </button>
+        </div>
+
+        <div class="notice">
+            QRIS ini merupakan QRIS statis. Setelah melakukan scan,
+            masukkan nominal pembayaran sesuai jumlah yang harus dibayar.
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Pembayaran aman menggunakan QRIS
+    </div>
+
+</div>
+
+<div class="toast" id="toast">
+    Berhasil disalin
+</div>
+
+<script>
+    const qris =
+        "00020101021126570011ID.DANA.WWW011893600915347793281102094779328110303UMI51440014ID.CO.QRIS.WWW0215ID10232780325200303UMI5204549953033605802ID5910JeelsBoobz6013Kab. Semarang6105507736304F8BE";
+
+    const qrElement = document.getElementById("qrcode");
+
+    new QRCode(qrElement, {
+        text: qris,
+        width: 310,
+        height: 310,
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+
+        toast.textContent = message;
+        toast.classList.add("show");
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 1800);
+    }
+
+    function downloadQR() {
+        const canvas = qrElement.querySelector("canvas");
+
+        if (!canvas) {
+            showToast("QR Code belum siap");
+            return;
+        }
+
+        const size = 1200;
+
+        const output = document.createElement("canvas");
+        output.width = size;
+        output.height = size;
+
+        const ctx = output.getContext("2d");
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, size, size);
+
+        ctx.drawImage(
+            canvas,
+            60,
+            60,
+            size - 120,
+            size - 120
+        );
+
+        const link = document.createElement("a");
+
+        link.download = "QRIS-JeelsBoobz.png";
+        link.href = output.toDataURL("image/png");
+
+        link.click();
+
+        showToast("QR Code berhasil disimpan");
+    }
+
+    async function shareQR() {
+
+        const canvas = qrElement.querySelector("canvas");
+
+        if (!canvas) {
+            showToast("QR Code belum siap");
+            return;
+        }
+
+        if (!navigator.share) {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                showToast("Link halaman disalin");
+            } catch {
+                showToast("Browser tidak mendukung fitur share");
+            }
+
+            return;
+        }
+
+        try {
+
+            const blob = await new Promise(resolve =>
+                canvas.toBlob(resolve, "image/png")
+            );
+
+            const file = new File(
+                [blob],
+                "QRIS-JeelsBoobz.png",
+                {
+                    type: "image/png"
+                }
+            );
+
+            if (
+                navigator.canShare &&
+                navigator.canShare({ files: [file] })
+            ) {
+
+                await navigator.share({
+                    title: "QRIS JeelsBoobz",
+                    text: "Scan QRIS untuk melakukan pembayaran.",
+                    files: [file]
+                });
+
+            } else {
+
+                await navigator.share({
+                    title: "QRIS JeelsBoobz",
+                    text: "Scan QRIS untuk melakukan pembayaran.",
+                    url: window.location.href
+                });
+
+            }
+
+        } catch (error) {
+
+            if (error.name !== "AbortError") {
+                showToast("Gagal membagikan QR");
+            }
+
+        }
+    }
+</script>
+
+</body>
+</html>
