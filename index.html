@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b0b0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="color-scheme" content="dark light">
+    <meta name="color-scheme" content="dark">
 
     <title>Bayar via QRIS — JeelsBoobz</title>
 
@@ -166,10 +166,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow:
-                0 15px 40px rgba(0,0,0,.25);
+            box-shadow: 0 15px 40px rgba(0,0,0,.25);
 
-            /* === PROTEKSI ANTI AUTO DARK MODE === */
+            /* Kunci elemen QR agar tidak di-invert auto-dark browser */
             color-scheme: only light;
             forced-color-adjust: none;
             -webkit-forced-color-adjust: none;
@@ -181,7 +180,6 @@
             justify-content: center;
             align-items: center;
 
-            /* === PROTEKSI ANTI AUTO DARK MODE === */
             color-scheme: only light;
             forced-color-adjust: none;
             -webkit-forced-color-adjust: none;
@@ -198,7 +196,6 @@
             padding: 4px;
             border-radius: 50%;
 
-            /* === PROTEKSI ANTI AUTO DARK MODE === */
             color-scheme: only light;
             forced-color-adjust: none;
             -webkit-forced-color-adjust: none;
@@ -212,7 +209,6 @@
             height: auto !important;
             aspect-ratio: 1 / 1;
 
-            /* === PROTEKSI ANTI AUTO DARK MODE === */
             color-scheme: only light;
             forced-color-adjust: none;
             -webkit-forced-color-adjust: none;
@@ -411,28 +407,6 @@
 
     <div class="card">
 
-        <!--
-        <div class="merchant">
-            <div class="merchant-logo">
-                JB
-            </div>
-
-            <div class="merchant-info">
-                <div class="merchant-name">
-                    JeelsBoobz
-                </div>
-
-                <div class="merchant-location">
-                    Kab. Semarang
-                </div>
-
-                <div class="verified">
-                    ✓ QRIS Merchant
-                </div>
-            </div>
-        </div>
-        -->
-
         <div class="qr-wrapper">
             <div id="qrcode"></div>
             <img src="./logo.jpg" alt="Logo" id="logoImage" class="qr-logo">
@@ -527,7 +501,7 @@
         }
         var logo = document.getElementById('logoImage');
 
-        var padding = 30; 
+        var padding = 30;
 
         var downloadCanvas = document.createElement('canvas');
         var dCtx = downloadCanvas.getContext('2d');
@@ -561,10 +535,10 @@
         dCtx.clip();
 
         dCtx.drawImage(
-            logo, 
-            centerX - logoRadius, 
-            centerY - logoRadius, 
-            logoSize, 
+            logo,
+            centerX - logoRadius,
+            centerY - logoRadius,
+            logoSize,
             logoSize
         );
         dCtx.restore();
@@ -585,7 +559,7 @@
         }
         var logo = document.getElementById('logoImage');
 
-        var padding = 30; 
+        var padding = 30;
 
         var shareCanvas = document.createElement('canvas');
         var dCtx = shareCanvas.getContext('2d');
@@ -619,10 +593,10 @@
         dCtx.clip();
 
         dCtx.drawImage(
-            logo, 
-            centerX - logoRadius, 
-            centerY - logoRadius, 
-            logoSize, 
+            logo,
+            centerX - logoRadius,
+            centerY - logoRadius,
+            logoSize,
             logoSize
         );
         dCtx.restore();
