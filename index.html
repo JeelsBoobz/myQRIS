@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b0b0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="color-scheme" content="dark light">
 
     <title>Bayar via QRIS — JeelsBoobz</title>
 
@@ -24,6 +25,7 @@
             --muted: #9999a5;
             --border: rgba(255,255,255,.08);
             --accent: #ffffff;
+            color-scheme: dark;
         }
 
         body {
@@ -166,6 +168,11 @@
             align-items: center;
             box-shadow:
                 0 15px 40px rgba(0,0,0,.25);
+
+            /* === PROTEKSI ANTI AUTO DARK MODE === */
+            color-scheme: only light;
+            forced-color-adjust: none;
+            -webkit-forced-color-adjust: none;
         }
 
         #qrcode {
@@ -173,6 +180,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+
+            /* === PROTEKSI ANTI AUTO DARK MODE === */
+            color-scheme: only light;
+            forced-color-adjust: none;
+            -webkit-forced-color-adjust: none;
         }
 
         .qr-logo {
@@ -185,6 +197,12 @@
             background: white;
             padding: 4px;
             border-radius: 50%;
+
+            /* === PROTEKSI ANTI AUTO DARK MODE === */
+            color-scheme: only light;
+            forced-color-adjust: none;
+            -webkit-forced-color-adjust: none;
+            filter: none !important;
         }
 
         #qrcode img,
@@ -193,6 +211,12 @@
             width: min(100%, 1200px) !important;
             height: auto !important;
             aspect-ratio: 1 / 1;
+
+            /* === PROTEKSI ANTI AUTO DARK MODE === */
+            color-scheme: only light;
+            forced-color-adjust: none;
+            -webkit-forced-color-adjust: none;
+            filter: none !important;
         }
 
         .scan-info {
