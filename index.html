@@ -1,330 +1,182 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0b0b0f">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="color-scheme" content="dark">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0b0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="dark">
+<title>Bayar via QRIS — JeelsBoobz</title>
 
-    <title>Bayar via QRIS — JeelsBoobz</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
-    <!-- Library QR matrix -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+    :root {
+        --bg: #0b0b0f;
+        --card: #15151b;
+        --card2: #1c1c23;
+        --text: #ffffff;
+        --muted: #9999a5;
+        --border: rgba(255,255,255,.08);
+        color-scheme: dark;
+    }
 
-        :root {
-            --bg: #0b0b0f;
-            --card: #15151b;
-            --card2: #1c1c23;
-            --text: #ffffff;
-            --muted: #9999a5;
-            --border: rgba(255,255,255,.08);
-            --accent: #ffffff;
-            color-scheme: dark;
-        }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at 50% 0%, #292934 0%, #111116 35%, #08080b 75%);
+        color: var(--text);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px 16px;
+    }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at 50% 0%, #292934 0%, #111116 35%, #08080b 75%);
-            color: var(--text);
-            font-family:
-                Inter,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
+    .container { width: 100%; max-width: 430px; animation: appear .5s ease; }
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+    @keyframes appear {
+        from { opacity: 0; transform: translateY(15px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 
-            padding: 24px 16px;
-        }
+    .header { text-align: center; margin-bottom: 20px; }
 
-        .container {
-            width: 100%;
-            max-width: 430px;
-            animation: appear .5s ease;
-        }
+    .brand {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 14px; color: #bdbdc7; margin-bottom: 10px;
+    }
 
-        @keyframes appear {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .brand-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #fff; box-shadow: 0 0 12px rgba(255,255,255,.8);
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    h1 { margin: 0; font-size: 27px; font-weight: 750; letter-spacing: -.6px; }
+    .header p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
 
-        .brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #bdbdc7;
-            margin-bottom: 10px;
-        }
+    .card {
+        background: rgba(21,21,27,.92);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 22px;
+        box-shadow: 0 25px 70px rgba(0,0,0,.45),
+                    inset 0 1px 0 rgba(255,255,255,.03);
+        backdrop-filter: blur(20px);
+    }
 
-        .brand-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 12px rgba(255,255,255,.8);
-        }
+    .qr-wrapper {
+        position: relative;
+        background: #fff;
+        border-radius: 22px;
+        padding: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 15px 40px rgba(0,0,0,.25);
+        color-scheme: only light;
+        forced-color-adjust: none;
+        -webkit-forced-color-adjust: none;
+    }
 
-        h1 {
-            margin: 0;
-            font-size: 27px;
-            font-weight: 750;
-            letter-spacing: -.6px;
-        }
+    #qrcode {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color-scheme: only light;
+        forced-color-adjust: none;
+        -webkit-forced-color-adjust: none;
+    }
 
-        .header p {
-            margin: 8px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
+    #qrcode canvas {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+        filter: none !important;
+        color-scheme: only light;
+        forced-color-adjust: none;
+        -webkit-forced-color-adjust: none;
+    }
 
-        .card {
-            background: rgba(21,21,27,.92);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 22px;
-            box-shadow:
-                0 25px 70px rgba(0,0,0,.45),
-                inset 0 1px 0 rgba(255,255,255,.03);
-            backdrop-filter: blur(20px);
-        }
+    .scan-info {
+        display: flex; align-items: center; justify-content: center;
+        gap: 7px; color: #a8a8b2; font-size: 13px; margin: 18px 0 20px;
+    }
 
-        .qr-wrapper {
-            position: relative;
-            background: #fff;
-            border-radius: 22px;
-            padding: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,.25);
+    .scan-icon {
+        width: 17px; height: 17px;
+        border: 1.5px solid #aaa; border-radius: 4px; position: relative;
+    }
 
-            color-scheme: only light;
-            forced-color-adjust: none;
-            -webkit-forced-color-adjust: none;
-        }
+    .scan-icon::after {
+        content: ""; position: absolute;
+        left: 3px; right: 3px; top: 7px; height: 1px; background: #aaa;
+    }
 
-        #qrcode {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+    .divider { height: 1px; background: var(--border); margin: 0 0 18px; }
 
-            color-scheme: only light;
-            forced-color-adjust: none;
-            -webkit-forced-color-adjust: none;
-        }
+    .payment-info {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 16px;
+    }
 
-        #qrcode canvas {
-            display: block;
-            width: 100% !important;
-            height: auto !important;
-            aspect-ratio: 1 / 1;
+    .payment-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+    .payment-row + .payment-row { margin-top: 10px; }
+    .label { color: #858591; font-size: 12px; }
+    .value { font-size: 13px; font-weight: 600; text-align: right; }
 
-            color-scheme: only light;
-            forced-color-adjust: none;
-            -webkit-forced-color-adjust: none;
-            filter: none !important;
-        }
+    .status { display: inline-flex; align-items: center; gap: 5px; color: #d5d5db; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; }
 
-        .scan-info {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            color: #a8a8b2;
-            font-size: 13px;
-            margin: 18px 0 20px;
-        }
+    .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        .scan-icon {
-            width: 17px;
-            height: 17px;
-            border: 1.5px solid #aaa;
-            border-radius: 4px;
-            position: relative;
-        }
+    button {
+        border: 0; min-height: 48px; border-radius: 14px;
+        font-size: 14px; font-weight: 700; cursor: pointer;
+        transition: transform .15s ease, opacity .15s ease, background .15s ease;
+    }
 
-        .scan-icon::after {
-            content: "";
-            position: absolute;
-            left: 3px;
-            right: 3px;
-            top: 7px;
-            height: 1px;
-            background: #aaa;
-        }
+    button:active { transform: scale(.97); }
+    .download { background: #fff; color: #111; }
+    .share { background: #292930; color: #fff; border: 1px solid var(--border); }
+    button:hover { opacity: .88; }
 
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0 0 18px;
-        }
+    .notice {
+        margin-top: 15px; padding: 13px 14px; border-radius: 14px;
+        background: rgba(255,255,255,.035);
+        border: 1px solid var(--border);
+        color: #858591; font-size: 11px; line-height: 1.55; text-align: center;
+    }
 
-        .payment-info {
-            background: var(--card2);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 16px;
-        }
+    .footer { text-align: center; color: #64646e; font-size: 11px; margin-top: 18px; }
 
-        .payment-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
+    .toast {
+        position: fixed; left: 50%; bottom: 25px;
+        transform: translate(-50%, 20px);
+        background: #fff; color: #111;
+        padding: 11px 17px; border-radius: 12px;
+        font-size: 13px; font-weight: 600;
+        opacity: 0; pointer-events: none;
+        transition: .25s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,.3);
+        z-index: 999;
+    }
 
-        .payment-row + .payment-row {
-            margin-top: 10px;
-        }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-        .label {
-            color: #858591;
-            font-size: 12px;
-        }
-
-        .value {
-            font-size: 13px;
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: #d5d5db;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #fff;
-        }
-
-        .buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        button {
-            border: 0;
-            min-height: 48px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition:
-                transform .15s ease,
-                opacity .15s ease,
-                background .15s ease;
-        }
-
-        button:active {
-            transform: scale(.97);
-        }
-
-        .download {
-            background: #fff;
-            color: #111;
-        }
-
-        .share {
-            background: #292930;
-            color: #fff;
-            border: 1px solid var(--border);
-        }
-
-        button:hover {
-            opacity: .88;
-        }
-
-        .notice {
-            margin-top: 15px;
-            padding: 13px 14px;
-            border-radius: 14px;
-            background: rgba(255,255,255,.035);
-            border: 1px solid var(--border);
-            color: #858591;
-            font-size: 11px;
-            line-height: 1.55;
-            text-align: center;
-        }
-
-        .footer {
-            text-align: center;
-            color: #64646e;
-            font-size: 11px;
-            margin-top: 18px;
-        }
-
-        .toast {
-            position: fixed;
-            left: 50%;
-            bottom: 25px;
-            transform: translate(-50%, 20px);
-            background: #fff;
-            color: #111;
-            padding: 11px 17px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            opacity: 0;
-            pointer-events: none;
-            transition: .25s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,.3);
-            z-index: 999;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
-
-        @media (max-width: 360px) {
-            .card {
-                padding: 16px;
-                border-radius: 23px;
-            }
-
-            .qr-wrapper {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
+    @media (max-width: 360px) {
+        .card { padding: 16px; border-radius: 23px; }
+        .qr-wrapper { padding: 10px; }
+        h1 { font-size: 24px; }
+    }
+</style>
 </head>
 
 <body>
@@ -336,9 +188,7 @@
             <span class="brand-dot"></span>
             Pembayaran Digital
         </div>
-
         <h1>Bayar dengan QRIS</h1>
-
         <p>Scan QR Code menggunakan aplikasi pembayaran Anda</p>
     </div>
 
@@ -356,36 +206,26 @@
         <div class="divider"></div>
 
         <div class="payment-info">
-
             <div class="payment-row">
                 <span class="label">Merchant</span>
                 <span class="value">JeelsBoobz</span>
             </div>
-
             <div class="payment-row">
                 <span class="label">Lokasi</span>
                 <span class="value">Kab. Semarang</span>
             </div>
-
             <div class="payment-row">
                 <span class="label">Status</span>
-
                 <span class="value status">
                     <span class="status-dot"></span>
                     Siap menerima pembayaran
                 </span>
             </div>
-
         </div>
 
         <div class="buttons">
-            <button class="download" onclick="downloadQR()">
-                ↓ &nbsp; Download QR
-            </button>
-
-            <button class="share" onclick="shareQR()">
-                ↗ &nbsp; Bagikan
-            </button>
+            <button class="download" onclick="downloadQR()">↓ &nbsp; Download QR</button>
+            <button class="share" onclick="shareQR()">↗ &nbsp; Bagikan</button>
         </div>
 
         <div class="notice">
@@ -395,305 +235,248 @@
 
     </div>
 
-    <div class="footer">
-        Pembayaran aman menggunakan QRIS
-    </div>
+    <div class="footer">Pembayaran aman menggunakan QRIS</div>
 
 </div>
 
-<div class="toast" id="toast">
-    Berhasil disalin
-</div>
+<div class="toast" id="toast">Berhasil disalin</div>
 
 <script>
-    const qris =
-        "00020101021126570011ID.DANA.WWW011893600915347793281102094779328110303UMI51440014ID.CO.QRIS.WWW0215ID10232780325200303UMI5204549953033605802ID5910JeelsBoobz6013Kab. Semarang6105507736304F8BE";
+const qris =
+    "00020101021126570011ID.DANA.WWW011893600915347793281102094779328110303UMI51440014ID.CO.QRIS.WWW0215ID10232780325200303UMI5204549953033605802ID5910JeelsBoobz6013Kab. Semarang6105507736304F8BE";
 
-    const qrContainer = document.getElementById("qrcode");
+const qrContainer = document.getElementById("qrcode");
 
-    const QR_SIZE = 1200;
-    const QUIET_ZONE = 4;
+const QR_SIZE = 1200;
+const QUIET_ZONE = 4;
+const LOGO_RATIO = 0.20; // diameter logo relatif terhadap lebar QR (hanya jika logo ada)
 
-    let qrCanvas = null;
+let qrCanvas = null;
 
-    function inFinder(row, col, count) {
-        return (
-            (row < 7 && col < 7) ||
-            (row < 7 && col >= count - 7) ||
-            (row >= count - 7 && col < 7)
-        );
-    }
+/* ---------- Helper ---------- */
 
-    function roundRect(ctx, x, y, w, h, r) {
-        const radius = Math.min(r, w / 2, h / 2);
+function inFinder(row, col, count) {
+    return (
+        (row < 7 && col < 7) ||
+        (row < 7 && col >= count - 7) ||
+        (row >= count - 7 && col < 7)
+    );
+}
 
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.arcTo(x + w, y, x + w, y + h, radius);
-        ctx.arcTo(x + w, y + h, x, y + h, radius);
-        ctx.arcTo(x, y + h, x, y, radius);
-        ctx.arcTo(x, y, x + w, y, radius);
-        ctx.closePath();
-    }
+function roundRect(ctx, x, y, w, h, r) {
+    const radius = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+}
 
-    function drawFinder(ctx, x, y, cell) {
-        // Outer hitam rounded
-        roundRect(ctx, x, y, cell * 7, cell * 7, cell * 1.6);
-        ctx.fillStyle = "#000";
-        ctx.fill();
+function drawFinder(ctx, x, y, cell) {
+    roundRect(ctx, x, y, cell * 7, cell * 7, cell * 1.6);
+    ctx.fillStyle = "#000";
+    ctx.fill();
 
-        // Ring putih
-        roundRect(
-            ctx,
-            x + cell,
-            y + cell,
-            cell * 5,
-            cell * 5,
-            cell * 1.1
-        );
-        ctx.fillStyle = "#fff";
-        ctx.fill();
+    roundRect(ctx, x + cell, y + cell, cell * 5, cell * 5, cell * 1.1);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
 
-        // Center hitam rounded
-        roundRect(
-            ctx,
-            x + cell * 2,
-            y + cell * 2,
-            cell * 3,
-            cell * 3,
-            cell * 0.85
-        );
-        ctx.fillStyle = "#000";
-        ctx.fill();
-    }
+    roundRect(ctx, x + cell * 2, y + cell * 2, cell * 3, cell * 3, cell * 0.85);
+    ctx.fillStyle = "#000";
+    ctx.fill();
+}
 
-    function createQRCanvas() {
-        // Gunakan level H agar tetap aman saat ada logo di tengah
-        const qr = qrcode(0, "H");
-        qr.addData(qris);
-        qr.make();
+/* ---------- Bangun QR ----------
+   hasLogo = true  -> skip dot di dalam lingkaran logo
+   hasLogo = false -> gambar semua dot (QR penuh, tanpa logo)          */
 
-        const count = qr.getModuleCount();
-        const totalModules = count + QUIET_ZONE * 2;
-        const cell = QR_SIZE / totalModules;
+function createQRCanvas(hasLogo) {
+    const qr = qrcode(0, "H");
+    qr.addData(qris);
+    qr.make();
 
-        const canvas = document.createElement("canvas");
-        canvas.width = QR_SIZE;
-        canvas.height = QR_SIZE;
+    const count = qr.getModuleCount();
+    const totalModules = count + QUIET_ZONE * 2;
+    const cell = QR_SIZE / totalModules;
 
-        const ctx = canvas.getContext("2d");
+    const canvas = document.createElement("canvas");
+    canvas.width = QR_SIZE;
+    canvas.height = QR_SIZE;
+    const ctx = canvas.getContext("2d");
 
-        // Background putih
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, QR_SIZE, QR_SIZE);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, QR_SIZE, QR_SIZE);
+    ctx.fillStyle = "#000000";
 
-        // Gambar titik-titik QR
-        ctx.fillStyle = "#000000";
+    const dotRadius = cell * 0.45;
+    const cx = QR_SIZE / 2;
+    const cy = QR_SIZE / 2;
 
-        for (let row = 0; row < count; row++) {
-            for (let col = 0; col < count; col++) {
-                if (!qr.isDark(row, col)) continue;
-                if (inFinder(row, col, count)) continue;
+    // Radius area yang perlu dibersihkan (lingkaran), hanya jika ada logo
+    const logoRadius  = hasLogo ? (QR_SIZE * LOGO_RATIO) / 2 : 0;
+    const padding     = hasLogo ? cell * 0.5 : 0;  // jarak napas antar dot dan logo
+    const clearRadius = logoRadius + padding + dotRadius;
 
-                const x = (col + QUIET_ZONE + 0.5) * cell;
-                const y = (row + QUIET_ZONE + 0.5) * cell;
-                const radius = cell * 0.45;
+    for (let row = 0; row < count; row++) {
+        for (let col = 0; col < count; col++) {
+            if (!qr.isDark(row, col)) continue;
+            if (inFinder(row, col, count)) continue;
 
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+            const x = (col + QUIET_ZONE + 0.5) * cell;
+            const y = (row + QUIET_ZONE + 0.5) * cell;
 
-        // Gambar finder pattern custom
-        drawFinder(
-            ctx,
-            QUIET_ZONE * cell,
-            QUIET_ZONE * cell,
-            cell
-        );
-
-        drawFinder(
-            ctx,
-            (QUIET_ZONE + count - 7) * cell,
-            QUIET_ZONE * cell,
-            cell
-        );
-
-        drawFinder(
-            ctx,
-            QUIET_ZONE * cell,
-            (QUIET_ZONE + count - 7) * cell,
-            cell
-        );
-
-        return canvas;
-    }
-
-    function loadLogo() {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error("Logo gagal dimuat"));
-            img.src = "./logo.jpg";
-        });
-    }
-
-    function drawImageCover(ctx, img, x, y, w, h) {
-        const iw = img.naturalWidth || img.width;
-        const ih = img.naturalHeight || img.height;
-
-        const scale = Math.max(w / iw, h / ih);
-        const sw = w / scale;
-        const sh = h / scale;
-
-        const sx = (iw - sw) / 2;
-        const sy = (ih - sh) / 2;
-
-        ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
-    }
-
-    function composeFinalCanvas(baseCanvas, logo) {
-        const finalCanvas = document.createElement("canvas");
-        finalCanvas.width = baseCanvas.width;
-        finalCanvas.height = baseCanvas.height;
-
-        const ctx = finalCanvas.getContext("2d");
-
-        ctx.drawImage(baseCanvas, 0, 0);
-
-        const centerX = finalCanvas.width / 2;
-        const centerY = finalCanvas.height / 2;
-
-        const logoSize = finalCanvas.width * 0.15;
-        const logoRadius = logoSize / 2;
-
-        // Lingkaran putih di belakang logo
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(
-            centerX,
-            centerY,
-            logoRadius + 14,
-            0,
-            Math.PI * 2
-        );
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-        ctx.restore();
-
-        // Logo dipotong bulat
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, logoRadius, 0, Math.PI * 2);
-        ctx.clip();
-
-        drawImageCover(
-            ctx,
-            logo,
-            centerX - logoRadius,
-            centerY - logoRadius,
-            logoSize,
-            logoSize
-        );
-
-        ctx.restore();
-
-        return finalCanvas;
-    }
-
-    async function initQR() {
-        const baseCanvas = createQRCanvas();
-
-        let logo = null;
-
-        try {
-            logo = await loadLogo();
-        } catch (error) {
-            console.warn("QR tetap ditampilkan tanpa logo:", error.message);
-        }
-
-        qrCanvas = logo
-            ? composeFinalCanvas(baseCanvas, logo)
-            : baseCanvas;
-
-        qrContainer.innerHTML = "";
-        qrContainer.appendChild(qrCanvas);
-    }
-
-    function showToast(message) {
-        const toast = document.getElementById("toast");
-
-        toast.textContent = message;
-        toast.classList.add("show");
-
-        clearTimeout(window.__toastTimer);
-
-        window.__toastTimer = setTimeout(() => {
-            toast.classList.remove("show");
-        }, 1800);
-    }
-
-    function downloadQR() {
-        if (!qrCanvas) {
-            showToast("QR Code belum siap");
-            return;
-        }
-
-        const image = qrCanvas.toDataURL("image/png");
-        const link = document.createElement("a");
-
-        link.download = "QRIS-JeelsBoobz.png";
-        link.href = image;
-
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        showToast("QR Code berhasil disimpan");
-    }
-
-    function shareQR() {
-        if (!qrCanvas) {
-            showToast("QR Code belum siap");
-            return;
-        }
-
-        qrCanvas.toBlob(async (blob) => {
-            if (!blob) {
-                showToast("Gagal membagikan QR");
-                return;
+            if (hasLogo) {
+                const dx = x - cx;
+                const dy = y - cy;
+                // Skip hanya jika titik masuk lingkaran logo (+ padding)
+                if (dx * dx + dy * dy < clearRadius * clearRadius) continue;
             }
 
-            const file = new File(
-                [blob],
-                "QRIS-JeelsBoobz.png",
-                { type: "image/png" }
-            );
+            ctx.beginPath();
+            ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
 
-            if (
-                navigator.canShare &&
-                navigator.canShare({ files: [file] })
-            ) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: "QRIS Pembayaran",
-                        text: "Silakan scan QR Code ini untuk melakukan pembayaran."
-                    });
-                } catch (error) {
-                    if (error.name !== "AbortError") {
-                        showToast("Gagal membagikan QR");
-                    }
+    drawFinder(ctx, QUIET_ZONE * cell, QUIET_ZONE * cell, cell);
+    drawFinder(ctx, (QUIET_ZONE + count - 7) * cell, QUIET_ZONE * cell, cell);
+    drawFinder(ctx, QUIET_ZONE * cell, (QUIET_ZONE + count - 7) * cell, cell);
+
+    return canvas;
+}
+
+/* ---------- Logo ---------- */
+
+function loadLogo() {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("logo.jpg tidak ditemukan"));
+        img.src = "./logo.jpg";
+    });
+}
+
+function drawImageCover(ctx, img, x, y, w, h) {
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
+    const scale = Math.max(w / iw, h / ih);
+    const sw = w / scale;
+    const sh = h / scale;
+    const sx = (iw - sw) / 2;
+    const sy = (ih - sh) / 2;
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function drawCircularLogo(canvas, logoImg) {
+    const ctx = canvas.getContext("2d");
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const logoRadius = (canvas.width * LOGO_RATIO) / 2;
+
+    // Lingkaran putih solid sebagai alas logo
+    ctx.beginPath();
+    ctx.arc(cx, cy, logoRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    // Clip logo menjadi bulat
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, logoRadius, 0, Math.PI * 2);
+    ctx.clip();
+    drawImageCover(
+        ctx,
+        logoImg,
+        cx - logoRadius,
+        cy - logoRadius,
+        logoRadius * 2,
+        logoRadius * 2
+    );
+    ctx.restore();
+}
+
+/* ---------- Init ---------- */
+
+async function initQR() {
+    let logo = null;
+
+    try {
+        logo = await loadLogo();
+    } catch (e) {
+        console.warn("Logo tidak tersedia, QR digambar penuh:", e.message);
+    }
+
+    qrCanvas = createQRCanvas(!!logo);
+
+    if (logo) {
+        drawCircularLogo(qrCanvas, logo);
+    }
+
+    qrContainer.innerHTML = "";
+    qrContainer.appendChild(qrCanvas);
+}
+
+/* ---------- Toast ---------- */
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 1800);
+}
+
+/* ---------- Download & Share ---------- */
+
+function downloadQR() {
+    if (!qrCanvas) {
+        showToast("QR Code belum siap");
+        return;
+    }
+    const image = qrCanvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.download = "QRIS-JeelsBoobz.png";
+    link.href = image;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showToast("QR Code berhasil disimpan");
+}
+
+function shareQR() {
+    if (!qrCanvas) {
+        showToast("QR Code belum siap");
+        return;
+    }
+    qrCanvas.toBlob(async (blob) => {
+        if (!blob) {
+            showToast("Gagal membagikan QR");
+            return;
+        }
+        const file = new File([blob], "QRIS-JeelsBoobz.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: "QRIS Pembayaran",
+                    text: "Silakan scan QR Code ini untuk melakukan pembayaran."
+                });
+            } catch (error) {
+                if (error.name !== "AbortError") {
+                    showToast("Gagal membagikan QR");
                 }
-            } else {
-                showToast("Browser tidak mendukung fitur share");
             }
-        }, "image/png");
-    }
+        } else {
+            showToast("Browser tidak mendukung fitur share");
+        }
+    }, "image/png");
+}
 
-    initQR();
+initQR();
 </script>
 
 </body>
