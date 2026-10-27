@@ -9,7 +9,8 @@
 
     <title>Bayar via QRIS — JeelsBoobz</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Library QR matrix -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
     <style>
         * {
@@ -113,62 +114,16 @@
             backdrop-filter: blur(20px);
         }
 
-        .merchant {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 4px 2px 20px;
-        }
-
-        .merchant-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #ffffff, #cfcfd5);
-            color: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 19px;
-            font-weight: 800;
-            box-shadow: 0 8px 25px rgba(0,0,0,.25);
-        }
-
-        .merchant-info {
-            flex: 1;
-        }
-
-        .merchant-name {
-            font-size: 17px;
-            font-weight: 700;
-        }
-
-        .merchant-location {
-            margin-top: 3px;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .verified {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 5px;
-            color: #bdbdc7;
-            font-size: 11px;
-        }
-
         .qr-wrapper {
             position: relative;
             background: #fff;
             border-radius: 22px;
-            padding: 18px;
+            padding: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: 0 15px 40px rgba(0,0,0,.25);
 
-            /* Kunci elemen QR agar tidak di-invert auto-dark browser */
             color-scheme: only light;
             forced-color-adjust: none;
             -webkit-forced-color-adjust: none;
@@ -185,27 +140,9 @@
             -webkit-forced-color-adjust: none;
         }
 
-        .qr-logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            background: white;
-            padding: 4px;
-            border-radius: 50%;
-
-            color-scheme: only light;
-            forced-color-adjust: none;
-            -webkit-forced-color-adjust: none;
-            filter: none !important;
-        }
-
-        #qrcode img,
         #qrcode canvas {
             display: block;
-            width: min(100%, 1200px) !important;
+            width: 100% !important;
             height: auto !important;
             aspect-ratio: 1 / 1;
 
@@ -380,7 +317,7 @@
             }
 
             .qr-wrapper {
-                padding: 12px;
+                padding: 10px;
             }
 
             h1 {
@@ -409,7 +346,6 @@
 
         <div class="qr-wrapper">
             <div id="qrcode"></div>
-            <img src="./logo.jpg" alt="Logo" id="logoImage" class="qr-logo">
         </div>
 
         <div class="scan-info">
@@ -473,14 +409,218 @@
     const qris =
         "00020101021126570011ID.DANA.WWW011893600915347793281102094779328110303UMI51440014ID.CO.QRIS.WWW0215ID10232780325200303UMI5204549953033605802ID5910JeelsBoobz6013Kab. Semarang6105507736304F8BE";
 
-    const qrElement = document.getElementById("qrcode");
+    const qrContainer = document.getElementById("qrcode");
 
-    new QRCode(qrElement, {
-        text: qris,
-        width: 1200,
-        height: 1200,
-        correctLevel: QRCode.CorrectLevel.M
-    });
+    const QR_SIZE = 1200;
+    const QUIET_ZONE = 4;
+
+    let qrCanvas = null;
+
+    function inFinder(row, col, count) {
+        return (
+            (row < 7 && col < 7) ||
+            (row < 7 && col >= count - 7) ||
+            (row >= count - 7 && col < 7)
+        );
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+    }
+
+    function drawFinder(ctx, x, y, cell) {
+        // Outer hitam rounded
+        roundRect(ctx, x, y, cell * 7, cell * 7, cell * 1.6);
+        ctx.fillStyle = "#000";
+        ctx.fill();
+
+        // Ring putih
+        roundRect(
+            ctx,
+            x + cell,
+            y + cell,
+            cell * 5,
+            cell * 5,
+            cell * 1.1
+        );
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+
+        // Center hitam rounded
+        roundRect(
+            ctx,
+            x + cell * 2,
+            y + cell * 2,
+            cell * 3,
+            cell * 3,
+            cell * 0.85
+        );
+        ctx.fillStyle = "#000";
+        ctx.fill();
+    }
+
+    function createQRCanvas() {
+        // Gunakan level H agar tetap aman saat ada logo di tengah
+        const qr = qrcode(0, "H");
+        qr.addData(qris);
+        qr.make();
+
+        const count = qr.getModuleCount();
+        const totalModules = count + QUIET_ZONE * 2;
+        const cell = QR_SIZE / totalModules;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = QR_SIZE;
+        canvas.height = QR_SIZE;
+
+        const ctx = canvas.getContext("2d");
+
+        // Background putih
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, QR_SIZE, QR_SIZE);
+
+        // Gambar titik-titik QR
+        ctx.fillStyle = "#000000";
+
+        for (let row = 0; row < count; row++) {
+            for (let col = 0; col < count; col++) {
+                if (!qr.isDark(row, col)) continue;
+                if (inFinder(row, col, count)) continue;
+
+                const x = (col + QUIET_ZONE + 0.5) * cell;
+                const y = (row + QUIET_ZONE + 0.5) * cell;
+                const radius = cell * 0.45;
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Gambar finder pattern custom
+        drawFinder(
+            ctx,
+            QUIET_ZONE * cell,
+            QUIET_ZONE * cell,
+            cell
+        );
+
+        drawFinder(
+            ctx,
+            (QUIET_ZONE + count - 7) * cell,
+            QUIET_ZONE * cell,
+            cell
+        );
+
+        drawFinder(
+            ctx,
+            QUIET_ZONE * cell,
+            (QUIET_ZONE + count - 7) * cell,
+            cell
+        );
+
+        return canvas;
+    }
+
+    function loadLogo() {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error("Logo gagal dimuat"));
+            img.src = "./logo.jpg";
+        });
+    }
+
+    function drawImageCover(ctx, img, x, y, w, h) {
+        const iw = img.naturalWidth || img.width;
+        const ih = img.naturalHeight || img.height;
+
+        const scale = Math.max(w / iw, h / ih);
+        const sw = w / scale;
+        const sh = h / scale;
+
+        const sx = (iw - sw) / 2;
+        const sy = (ih - sh) / 2;
+
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    function composeFinalCanvas(baseCanvas, logo) {
+        const finalCanvas = document.createElement("canvas");
+        finalCanvas.width = baseCanvas.width;
+        finalCanvas.height = baseCanvas.height;
+
+        const ctx = finalCanvas.getContext("2d");
+
+        ctx.drawImage(baseCanvas, 0, 0);
+
+        const centerX = finalCanvas.width / 2;
+        const centerY = finalCanvas.height / 2;
+
+        const logoSize = finalCanvas.width * 0.15;
+        const logoRadius = logoSize / 2;
+
+        // Lingkaran putih di belakang logo
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(
+            centerX,
+            centerY,
+            logoRadius + 14,
+            0,
+            Math.PI * 2
+        );
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.restore();
+
+        // Logo dipotong bulat
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, logoRadius, 0, Math.PI * 2);
+        ctx.clip();
+
+        drawImageCover(
+            ctx,
+            logo,
+            centerX - logoRadius,
+            centerY - logoRadius,
+            logoSize,
+            logoSize
+        );
+
+        ctx.restore();
+
+        return finalCanvas;
+    }
+
+    async function initQR() {
+        const baseCanvas = createQRCanvas();
+
+        let logo = null;
+
+        try {
+            logo = await loadLogo();
+        } catch (error) {
+            console.warn("QR tetap ditampilkan tanpa logo:", error.message);
+        }
+
+        qrCanvas = logo
+            ? composeFinalCanvas(baseCanvas, logo)
+            : baseCanvas;
+
+        qrContainer.innerHTML = "";
+        qrContainer.appendChild(qrCanvas);
+    }
 
     function showToast(message) {
         const toast = document.getElementById("toast");
@@ -488,142 +628,72 @@
         toast.textContent = message;
         toast.classList.add("show");
 
-        setTimeout(() => {
+        clearTimeout(window.__toastTimer);
+
+        window.__toastTimer = setTimeout(() => {
             toast.classList.remove("show");
         }, 1800);
     }
 
     function downloadQR() {
-        var qrCanvas = document.querySelector('#qrcode canvas');
         if (!qrCanvas) {
             showToast("QR Code belum siap");
             return;
         }
-        var logo = document.getElementById('logoImage');
 
-        var padding = 30;
+        const image = qrCanvas.toDataURL("image/png");
+        const link = document.createElement("a");
 
-        var downloadCanvas = document.createElement('canvas');
-        var dCtx = downloadCanvas.getContext('2d');
-
-        downloadCanvas.width = qrCanvas.width + (padding * 2);
-        downloadCanvas.height = qrCanvas.height + (padding * 2);
-
-        dCtx.fillStyle = "#ffffff";
-        dCtx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
-
-        dCtx.drawImage(qrCanvas, padding, padding);
-
-        var centerX = downloadCanvas.width / 2;
-        var centerY = downloadCanvas.height / 2;
-
-        var logoSize = qrCanvas.width * 0.16;
-        var logoRadius = logoSize / 2;
-
-        dCtx.save();
-        dCtx.beginPath();
-        dCtx.arc(centerX, centerY, logoRadius + 10, 0, Math.PI * 2, true);
-        dCtx.closePath();
-        dCtx.fillStyle = "#ffffff";
-        dCtx.fill();
-        dCtx.restore();
-
-        dCtx.save();
-        dCtx.beginPath();
-        dCtx.arc(centerX, centerY, logoRadius, 0, Math.PI * 2, true);
-        dCtx.closePath();
-        dCtx.clip();
-
-        dCtx.drawImage(
-            logo,
-            centerX - logoRadius,
-            centerY - logoRadius,
-            logoSize,
-            logoSize
-        );
-        dCtx.restore();
-
-        var image = downloadCanvas.toDataURL("image/png");
-        var link = document.createElement('a');
         link.download = "QRIS-JeelsBoobz.png";
         link.href = image;
+
+        document.body.appendChild(link);
         link.click();
+        link.remove();
+
         showToast("QR Code berhasil disimpan");
     }
 
-    async function shareQR() {
-        var qrCanvas = document.querySelector('#qrcode canvas');
+    function shareQR() {
         if (!qrCanvas) {
             showToast("QR Code belum siap");
             return;
         }
-        var logo = document.getElementById('logoImage');
 
-        var padding = 30;
-
-        var shareCanvas = document.createElement('canvas');
-        var dCtx = shareCanvas.getContext('2d');
-
-        shareCanvas.width = qrCanvas.width + (padding * 2);
-        shareCanvas.height = qrCanvas.height + (padding * 2);
-
-        dCtx.fillStyle = "#ffffff";
-        dCtx.fillRect(0, 0, shareCanvas.width, shareCanvas.height);
-
-        dCtx.drawImage(qrCanvas, padding, padding);
-
-        var centerX = shareCanvas.width / 2;
-        var centerY = shareCanvas.height / 2;
-
-        var logoSize = qrCanvas.width * 0.16;
-        var logoRadius = logoSize / 2;
-
-        dCtx.save();
-        dCtx.beginPath();
-        dCtx.arc(centerX, centerY, logoRadius + 10, 0, Math.PI * 2, true);
-        dCtx.closePath();
-        dCtx.fillStyle = "#ffffff";
-        dCtx.fill();
-        dCtx.restore();
-
-        dCtx.save();
-        dCtx.beginPath();
-        dCtx.arc(centerX, centerY, logoRadius, 0, Math.PI * 2, true);
-        dCtx.closePath();
-        dCtx.clip();
-
-        dCtx.drawImage(
-            logo,
-            centerX - logoRadius,
-            centerY - logoRadius,
-            logoSize,
-            logoSize
-        );
-        dCtx.restore();
-
-        shareCanvas.toBlob(async (blob) => {
+        qrCanvas.toBlob(async (blob) => {
             if (!blob) {
                 showToast("Gagal membagikan QR");
                 return;
             }
 
-            const file = new File([blob], 'QRIS-JeelsBoobz.png', { type: 'image/png' });
+            const file = new File(
+                [blob],
+                "QRIS-JeelsBoobz.png",
+                { type: "image/png" }
+            );
 
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            if (
+                navigator.canShare &&
+                navigator.canShare({ files: [file] })
+            ) {
                 try {
                     await navigator.share({
                         files: [file],
-                        title: 'QRIS Pembayaran',
-                        text: 'Silakan scan QR Code ini untuk melakukan pembayaran.'
+                        title: "QRIS Pembayaran",
+                        text: "Silakan scan QR Code ini untuk melakukan pembayaran."
                     });
                 } catch (error) {
-                    showToast("Gagal membagikan QR");
+                    if (error.name !== "AbortError") {
+                        showToast("Gagal membagikan QR");
+                    }
                 }
             } else {
                 showToast("Browser tidak mendukung fitur share");
             }
-        }, 'image/png');
+        }, "image/png");
     }
+
+    initQR();
 </script>
 
 </body>
